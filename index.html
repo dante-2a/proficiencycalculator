@@ -54,6 +54,7 @@
       font-size: 0.9rem;
       margin-bottom: 6px;
       font-weight: 600;
+      text-transform: lowercase;
     }
 
     input {
@@ -84,6 +85,7 @@
       border-radius: 6px;
       cursor: pointer;
       transition: background 0.2s ease;
+      text-transform: lowercase;
     }
 
     button:hover {
@@ -92,7 +94,7 @@
 
     .result-box {
       margin-top: 24px;
-      padding: 16px;
+      padding: 20px;
       border-radius: 8px;
       background: #111722;
       border: 1px solid var(--border-color);
@@ -100,10 +102,33 @@
       display: none;
     }
 
+    .tier-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .tier-badge {
+      width: 84px;
+      height: 84px;
+      object-fit: contain;
+      margin-bottom: 6px;
+    }
+
+    .tier-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--accent-color);
+      text-transform: lowercase;
+      letter-spacing: 1px;
+    }
+
     .result-title {
       font-size: 0.85rem;
       color: #8fa0b5;
       margin-bottom: 6px;
+      text-transform: lowercase;
     }
 
     .result-value {
@@ -158,6 +183,11 @@
     <button onclick="calculateProgress()">calculate progress :3</button>
 
     <div class="result-box" id="resultBox">
+      <div class="tier-container">
+        <img id="tierBadge" class="tier-badge" src="" alt="tier badge">
+        <div id="tierName" class="tier-name"></div>
+      </div>
+
       <div class="result-title">progress toward target</div>
       <div class="result-value" id="percentDisplay">0%</div>
       <div class="points-breakdown" id="pointsDisplay">0 / 0 proficiency</div>
@@ -168,6 +198,21 @@
   </div>
 
   <script>
+    // Map levels to corresponding tier name and image
+    function getTierInfo(l) {
+      if (l <= 4) return { name: "agent", img: "rivals1.png" };
+      if (l <= 9) return { name: "knight", img: "rivals2.png" };
+      if (l <= 14) return { name: "captain", img: "rivals3.png" };
+      if (l <= 19) return { name: "centurion", img: "rivals4.png" };
+      if (l <= 24) return { name: "lord", img: "rivals5.png" };
+      if (l <= 29) return { name: "count", img: "rivals6.png" };
+      if (l <= 34) return { name: "colonel", img: "rivals7.png" };
+      if (l <= 39) return { name: "warrior", img: "rivals8.png" };
+      if (l <= 44) return { name: "elite", img: "rivals9.png" };
+      if (l <= 49) return { name: "guardian", img: "rivals10.png" };
+      return { name: "champion", img: "rivals11.png" };
+    }
+
     // Piecewise function j(l): base proficiency for the bracket
     function j(l) {
       if (l < 5) return 0;
@@ -209,7 +254,7 @@
       const targetLevel = parseInt(document.getElementById('targetLevel').value) || 1;
 
       if (targetLevel <= currentLevel) {
-        alert("target level must be higher than your current level! >:(");
+        alert("Target level must be higher than your current level.");
         return;
       }
 
@@ -223,11 +268,20 @@
       let percentage = (currentTotal / targetTotal) * 100;
       percentage = Math.min(Math.max(percentage, 0), 100);
 
+      // 4. Target Tier Information
+      const tierInfo = getTierInfo(targetLevel);
+
       // Update UI
       const resultBox = document.getElementById('resultBox');
+      const tierBadge = document.getElementById('tierBadge');
+      const tierName = document.getElementById('tierName');
       const percentDisplay = document.getElementById('percentDisplay');
       const pointsDisplay = document.getElementById('pointsDisplay');
       const progressBar = document.getElementById('progressBar');
+
+      tierBadge.src = tierInfo.img;
+      tierBadge.alt = tierInfo.name;
+      tierName.innerText = tierInfo.name;
 
       resultBox.style.display = 'block';
       percentDisplay.innerText = percentage.toFixed(2) + '%';
