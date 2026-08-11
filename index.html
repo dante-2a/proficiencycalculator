@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>dante's proficiency calculator</title>
+  
+  <link rel="icon" type="image/png" href="rivals11.png">
+
   <style>
     :root {
       --bg-color: #0f141c;
       --card-bg: #1a222f;
-      --accent-color: #d6335c; /* Cherry accent */
-      --accent-hover: #b82347; /* Slightly darker cherry for hover */
+      --accent-color: #d6335c;
+      --accent-hover: #b82347;
       --text-color: #e0e6ed;
       --border-color: #2e3a4e;
     }
@@ -198,7 +201,6 @@
   </div>
 
   <script>
-    // Map levels to corresponding tier name and image
     function getTierInfo(l) {
       if (l <= 4) return { name: "agent", img: "rivals1.png" };
       if (l <= 9) return { name: "knight", img: "rivals2.png" };
@@ -213,7 +215,6 @@
       return { name: "champion", img: "rivals11.png" };
     }
 
-    // Piecewise function j(l): base proficiency for the bracket
     function j(l) {
       if (l < 5) return 0;
       if (l < 10) return 500;
@@ -223,7 +224,6 @@
       return 54100;
     }
 
-    // Piecewise function k(l): base level offset
     function k(l) {
       if (l < 5) return 1;
       if (l < 10) return 5;
@@ -233,7 +233,6 @@
       return 50;
     }
 
-    // Piecewise function v(l): EXP per level in the bracket
     function v(l) {
       if (l < 5) return 125;
       if (l < 10) return 240;
@@ -243,7 +242,6 @@
       return 3100;
     }
 
-    // Calculates total cumulative proficiency earned: c = p + (j(l) + ((l - k(l)) * v(l)))
     function calculateTotalProficiency(l, p) {
       return p + (j(l) + ((l - k(l)) * v(l)));
     }
@@ -258,20 +256,14 @@
         return;
       }
 
-      // 1. Current total EXP earned
       const currentTotal = calculateTotalProficiency(currentLevel, currentExp);
-
-      // 2. Target total EXP needed (target level with 0 extra points)
       const targetTotal = calculateTotalProficiency(targetLevel, 0);
 
-      // 3. Percentage
       let percentage = (currentTotal / targetTotal) * 100;
       percentage = Math.min(Math.max(percentage, 0), 100);
 
-      // 4. Target Tier Information
       const tierInfo = getTierInfo(targetLevel);
 
-      // Update UI
       const resultBox = document.getElementById('resultBox');
       const tierBadge = document.getElementById('tierBadge');
       const tierName = document.getElementById('tierName');
