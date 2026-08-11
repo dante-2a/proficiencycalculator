@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marvel Rivals Proficiency Tracker</title>
+  <style>
+    :root {
+      --bg-color: #0f141c;
+      --card-bg: #1a222f;
+      --accent-color: #f39c12;
+      --text-color: #e0e6ed;
+      --border-color: #2e3a4e;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .calculator-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: #111722;
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: var(--accent-color);
+      color: #000;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #e67e22;
+    }
+
+    .result-box {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 8px;
+      background: #111722;
+      border: 1px solid var(--border-color);
+      text-align: center;
+      display: none;
+    }
+
+    .result-title {
+      font-size: 0.85rem;
+      color: #8fa0b5;
+      margin-bottom: 6px;
+    }
+
+    .result-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--accent-color);
+    }
+
+    .points-breakdown {
+      font-size: 0.85rem;
+      color: #8fa0b5;
+      margin-top: 6px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 10px;
+      background: #2e3a4e;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent-color);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calculator-card">
+    <h1>Proficiency Tracker</h1>
+
+    <div class="form-group">
+      <label for="currentLevel">Current Level</label>
+      <input type="number" id="currentLevel" placeholder="e.g. 12" min="1" max="70" value="12">
+    </div>
+
+    <div class="form-group">
+      <label for="currentExp">Current Points</label>
+      <input type="number" id="currentExp" placeholder="e.g. 200" min="0" value="200">
+    </div>
+
+    <div class="form-group">
+      <label for="targetLevel">Target Level</label>
+      <input type="number" id="targetLevel" placeholder="e.g. 20" min="2" max="70" value="20">
+    </div>
+
+    <button onclick="calculateProgress()">Calculate Progress</button>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-title">Progress Toward Target</div>
+      <div class="result-value" id="percentDisplay">0%</div>
+      <div class="points-breakdown" id="pointsDisplay">0 / 0 EXP</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Piecewise function j(l): base proficiency for the bracket
+    function j(l) {
+      if (l < 5) return 0;
+      if (l < 10) return 500;
+      if (l < 15) return 1700;
+      if (l < 20) return 3700;
+      if (l < 50) return 6100;
+      return 54100;
+    }
+
+    // Piecewise function k(l): base level offset
+    function k(l) {
+      if (l < 5) return 1;
+      if (l < 10) return 5;
+      if (l < 15) return 10;
+      if (l < 20) return 15;
+      if (l < 50) return 20;
+      return 50;
+    }
+
+    // Piecewise function v(l): EXP per level in the bracket
+    function v(l) {
+      if (l < 5) return 125;
+      if (l < 10) return 240;
+      if (l < 15) return 400;
+      if (l < 20) return 480;
+      if (l < 50) return 1600;
+      return 3100;
+    }
+
+    // Calculates total cumulative proficiency earned: c = p + (j(l) + ((l - k(l)) * v(l)))
+    function calculateTotalProficiency(l, p) {
+      return p + (j(l) + ((l - k(l)) * v(l)));
+    }
+
+    function calculateProgress() {
+      const currentLevel = parseInt(document.getElementById('currentLevel').value) || 1;
+      const currentExp = parseInt(document.getElementById('currentExp').value) || 0;
+      const targetLevel = parseInt(document.getElementById('targetLevel').value) || 1;
+
+      if (targetLevel <= currentLevel) {
+        alert("Target level must be higher than your current level.");
+        return;
+      }
+
+      // 1. Current total EXP earned
+      const currentTotal = calculateTotalProficiency(currentLevel, currentExp);
+
+      // 2. Target total EXP needed (target level with 0 extra points)
+      const targetTotal = calculateTotalProficiency(targetLevel, 0);
+
+      // 3. Percentage
+      let percentage = (currentTotal / targetTotal) * 100;
+      percentage = Math.min(Math.max(percentage, 0), 100);
+
+      // Update UI
+      const resultBox = document.getElementById('resultBox');
+      const percentDisplay = document.getElementById('percentDisplay');
+      const pointsDisplay = document.getElementById('pointsDisplay');
+      const progressBar = document.getElementById('progressBar');
+
+      resultBox.style.display = 'block';
+      percentDisplay.innerText = percentage.toFixed(2) + '%';
+      pointsDisplay.innerText = `${currentTotal.toLocaleString()} / ${targetTotal.toLocaleString()} Total EXP`;
+      progressBar.style.width = percentage + '%';
+    }
+  </script>
+
+</body>
+</html>
