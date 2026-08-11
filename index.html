@@ -209,7 +209,7 @@
       const targetLevel = parseInt(document.getElementById('targetLevel').value) || 1;
 
       if (targetLevel <= currentLevel) {
-        alert("Target level must be higher than your current level.");
+        alert("target level must be higher than your current level! >:(");
         return;
       }
 
@@ -231,7 +231,7 @@
 
       resultBox.style.display = 'block';
       percentDisplay.innerText = percentage.toFixed(2) + '%';
-      pointsDisplay.innerText = `${currentTotal.toLocaleString()} / ${targetTotal.toLocaleString()} Total EXP`;
+      pointsDisplay.innerText = `${currentTotal.toLocaleString()} / ${targetTotal.toLocaleString()} total proficiency`;
       progressBar.style.width = percentage + '%';
     }
   </script>
